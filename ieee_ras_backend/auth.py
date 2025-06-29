@@ -97,35 +97,5 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         raise
-@auth_router.get("/validate-slot-access")
-def validate_slot_access(request: Request, db: Session = Depends(get_db)):
-    logger.info("[Route Hit] /validate-slot-access triggered")
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid or missing token")
 
-    token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=403, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Could not validate credentials")
-
-    user = db.query(User).filter(User.username == username).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    booking = db.query(Booking).filter(Booking.user_id == user.id).first()
-    if not booking:
-        return {"access": False}
-
-    now = datetime.now()
-    slot_start = booking.slot_time
-    slot_end = slot_start + timedelta(minutes=30)
-
-    logger.info(f"[Slot Check] Now: {now}, Slot Start: {slot_start}, End: {slot_end}")
-
-    return {"access": slot_start <= now <= slot_end}
 

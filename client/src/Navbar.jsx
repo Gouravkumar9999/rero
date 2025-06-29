@@ -15,7 +15,8 @@ const Navbar = ({ user, setUser }) => {
       try {
         const res = await fetch('http://localhost:8000/validate-slot-access', {
           headers: {
-            Authorization: `Bearer ${user.access_token}`
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json"
           }
         });
         const data = await res.json();

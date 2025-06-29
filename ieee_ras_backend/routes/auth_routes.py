@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import APIRouter, Depends, HTTPException, Form , Request
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User, Booking
 from auth_utils import verify_password, create_access_token, hash_password
-from datetime import datetime
+from datetime import datetime ,timedelta
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from config import SECRET_KEY, ALGORITHM
@@ -91,30 +91,33 @@ def get_bookings(db: Session = Depends(get_db)):
     ]
 
 
-# Validate if user is allowed access to ArduinoUploader
+
 @auth_router.get("/validate-slot-access")
-def validate_slot_access(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    now = datetime.now().strftime("%H:%M")
-    today = datetime.now().date()
-
-    print("[DEBUG] Validating access for user:", user.username)
-    print("[DEBUG] Current time:", now, "| Today:", today)
-
-    booking = db.query(Booking).filter(
-        Booking.user_id == user.id,
-        Booking.slot_date == today
-    ).first()
-
-    if not booking:
-        print("[DEBUG] No booking found for today.")
-        return {"access": False}
-
-    booking_time = booking.slot_time.strftime("%H:%M")
-    print("[DEBUG] Booking time:", booking_time)
-
-    if now == booking_time:
-        print("[DEBUG] Slot match successful.")
-        return {"access": True}
-    else:
-        print("[DEBUG] Slot time does not match current time.")
-        return {"access": False}
+def validate_slot_access(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    now = datetime.now()
+    start_of_day = datetime(now.year, now.month, now.day, 0, 0, 0)
+    end_of_day = datetime(now.year, now.month, now.day, 23, 59, 59, 999999)
+    print("Filter bounds:", start_of_day, "to", end_of_day)
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.user_id == user.id,
+            Booking.slot_time >= start_of_day,
+            Booking.slot_time <= end_of_day,
+        )
+        .all()
+    )
+    print(f"NOW: {now} (type: {type(now)})")
+    for booking in bookings:
+        print(f"SLOT_START: {booking.slot_time} (type: {type(booking.slot_time)})")
+        slot_start = booking.slot_time
+        slot_end = slot_start + timedelta(minutes=30)
+        print(f"Checking if {slot_start} <= {now} <= {slot_end}")
+        if slot_start <= now <= slot_end:
+            print("ACCESS GRANTED")
+            return {"access": True}
+    print("ACCESS DENIED")
+    return {"access": False}

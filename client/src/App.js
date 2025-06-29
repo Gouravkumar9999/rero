@@ -43,8 +43,8 @@ function App() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
           <Route
-  path="/uploader"
-  element={user ? (<UploaderPage user={user} />) : (<Navigate to="/login" replace />)}
+            path="/uploader"
+            element={user ? (<UploaderPage user={user} />) : (<Navigate to="/login" replace />)}
 />
           <Route
             path="/timeslots"
