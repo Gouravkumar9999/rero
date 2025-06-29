@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]
+python-socketio
+fastapi-socketio
+python-multipart
+aiosqlite
+python-socketio[asyncio_client]
+PyJWT>=2.0.0
