@@ -1,0 +1,43 @@
+{
+    "selectOnLineNumbers": true,
+    "roundedSelection": true,
+    "readOnly": false,
+    "cursorStyle": "line",
+    "cursorBlinking": "blink",
+    "automaticLayout": true,
+    "minimap": {
+      "enabled": true
+    },
+    "glyphMargin": true,
+    "renderLineHighlight": "all",
+    "scrollBeyondLastLine": false,
+    "autoClosingBrackets": "always",
+    "autoClosingQuotes": "always",
+    "autoIndent": "advanced",
+    "formatOnType": true,
+    "formatOnPaste": true,
+    "suggestOnTriggerCharacters": true,
+    "acceptSuggestionOnEnter": "on",
+    "quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "parameterHints": {
+      "enabled": true
+    },
+    "codeLens": true,
+    "tabSize": 2,
+    "insertSpaces": true,
+    "folding": true,
+    "renderWhitespace": "boundary",
+    "wordWrap": "on",
+    "matchBrackets": "always",
+    "lightbulb": {
+      "enabled": true
+    },
+    "hover": {
+      "enabled": true
+    },
+    "language": "cpp"
+  }
