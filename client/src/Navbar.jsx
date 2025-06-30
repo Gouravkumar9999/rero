@@ -6,7 +6,7 @@ import GradientText from "./components/gradientText";
 import { getSocket } from './socket';
 
 const Navbar = ({ user, setUser }) => {
-  const [hasSlotAccess, setHasSlotAccess] = useState(false); // ✅ Hook inside the component
+  const [hasSlotAccess, setHasSlotAccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {

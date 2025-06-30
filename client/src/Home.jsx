@@ -8,7 +8,7 @@ function Home() {
         <h2>Contents</h2>
         <ul>
           <li><a href="#intro">Introduction</a></li>
-          <li><a href="https://github.com/IEEERASPESU">Remote Robotics Laboratory</a></li>
+          <li><a href="https://rerolab.com/">Remote Robotics Laboratory</a></li>
           <li><a href="https://github.com/IEEERASPESU">GitHub IEEE Robotics & Society PES University</a></li>
           <li><a href="#benefits">Benefits</a></li>
           <li><a href="#inauguration">Inauguration</a></li>

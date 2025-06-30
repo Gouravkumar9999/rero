@@ -70,6 +70,7 @@ const UploaderPage = forwardRef(({ user }, ref) => {
     };
 
     newSocket.onmessage = (event) => {
+      console.log("[WebSocket Received]:", event.data);  
       setLogs((prevLogs) => [...prevLogs, event.data]);
     };
 
@@ -180,16 +181,16 @@ const UploaderPage = forwardRef(({ user }, ref) => {
       </div>
 
       {/* Logs Display */}
-      <div className="max-w-6xl mx-auto mt-8 bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-gray-800 p-4">
-          <h2 className="text-xl font-semibold mb-2 text-gray-300">Logs:</h2>
-          <div className="text-sm text-gray-400 overflow-y-auto max-h-40">
-            {logs.map((log, index) => (
-              <p key={index}>{log}</p>
-            ))}
-          </div>
-        </div>
-      </div>
+      <div className="max-w-6xl mx-auto mt-8 bg-white text-black rounded-2xl shadow-2xl overflow-hidden border border-gray-300">
+  <div className="p-4">
+    <h2 className="text-xl font-semibold mb-2 text-white-800">Logs:</h2>
+    <div className="bg-gray-100 text-sm font-mono whitespace-pre-wrap break-words overflow-y-auto max-h-64 p-4 rounded-xl border border-gray-300">
+      {logs.map((log, index) => (
+        <p key={index}>{log}</p>
+      ))}
+    </div>
+  </div>
+</div>
     </motion.div>
   );
 });

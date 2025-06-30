@@ -32,7 +32,8 @@ body {
 }
 .navbar-links {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 15px;
 }
 
 .navbar-links a {

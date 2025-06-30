@@ -122,7 +122,6 @@ export default function TimeSlot({ user }) {
     });
 
     socket.on('slot-cleared', ({ slotTime }) => {
-      console.log('[Frontend] Received slot-cleared for', slotTime);
       setBookedSlots(prev => {
         const updated = { ...prev };
         delete updated[slotTime];

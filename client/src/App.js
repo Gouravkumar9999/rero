@@ -7,6 +7,7 @@ import Register from './Register';
 import TimeSlot from './TimeSlot';
 import UploaderPage from './UploaderPage.js'
 import Particles from "./components/particles";
+import RobotShowcase from './RobotShowcase';
 import './App.css';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/robots" element={<RobotShowcase />} />
           <Route
             path="/uploader"
             element={user ? (<UploaderPage user={user} />) : (<Navigate to="/login" replace />)}
