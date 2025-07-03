@@ -6,7 +6,6 @@ import Login from './Login';
 import Register from './Register';
 import TimeSlot from './TimeSlot';
 import UploaderPage from './UploaderPage.js'
-import Particles from "./components/particles";
 import './App.css';
 
 function App() {
@@ -21,21 +20,6 @@ function App() {
 
   return (
     <Router>
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 0 , pointerEvents: "auto" }}>
-        <Particles 
-          particleCount={900}
-          particleSpread={2}
-          speed={0.1}
-          particleColors={["#2BC6D1", "#28007B", "#FFFFFF"]}
-          moveParticlesOnHover={true}
-          particleHoverFactor={1.2}
-          alphaParticles={true}
-          particleBaseSize={50}
-          sizeRandomness={0.5}
-          cameraDistance={15}
-          disableRotation={false}
-        />
-      </div>
       <div className="content">
         <Navbar user={user} setUser={setUser} />
         <Routes>
