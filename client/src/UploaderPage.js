@@ -181,10 +181,10 @@ const UploaderPage = forwardRef(({ user }, ref) => {
       </div>
 
       {/* Logs Display */}
-      <div className="max-w-6xl mx-auto mt-8 bg-white text-black rounded-2xl shadow-2xl overflow-hidden border border-gray-300">
+      <div className="max-w-6xl mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
   <div className="p-4">
     <h2 className="text-xl font-semibold mb-2 text-white-800">Logs:</h2>
-    <div className="bg-gray-100 text-sm font-mono whitespace-pre-wrap break-words overflow-y-auto max-h-64 p-4 rounded-xl border border-gray-300">
+    <div className="max-w-6xl mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
       {logs.map((log, index) => (
         <p key={index}>{log}</p>
       ))}
