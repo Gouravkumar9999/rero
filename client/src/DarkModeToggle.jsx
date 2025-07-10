@@ -1,29 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-export default function DarkModeToggle() {
-  const [dark, setDark] = useState(() =>
-    (localStorage.getItem("theme") === "dark") ||
-    (localStorage.getItem("theme") !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  );
+const DarkModeToggle = () => {
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+    const storedTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+
+    if (
+      storedTheme === 'dark' ||
+      (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      root.classList.add('dark');
+      setIsDark(true);
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      root.classList.remove('dark');
+      setIsDark(false);
     }
-  }, [dark]);
+  }, []);
+
+  const toggleTheme = () => {
+    const root = document.documentElement;
+    const newMode = !isDark;
+    setIsDark(newMode);
+
+    if (newMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   return (
     <button
-      className="ml-4 px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 transition"
-      onClick={() => setDark(d => !d)}
-      aria-label="Toggle dark mode"
-      title="Toggle dark/light mode"
+      onClick={toggleTheme}
+      className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center shadow-inner hover:scale-105 transition-transform"
+      title="Toggle Appearance"
     >
-      {dark ? "🌙 Dark" : "☀️ Light"}
+      <div className="relative w-6 h-6 rounded-full overflow-hidden shadow-sm">
+        {/* Half circle background */}
+        <div className="absolute inset-0 bg-white dark:bg-black" />
+        <div className="absolute inset-0 w-1/2 bg-black dark:bg-white" />
+        {/* Center dot */}
+        <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-black dark:bg-white transform -translate-x-1/2 -translate-y-1/2" />
+      </div>
     </button>
   );
-}
+};
+
+export default DarkModeToggle;

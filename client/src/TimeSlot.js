@@ -32,6 +32,30 @@ export default function TimeSlot({ user }) {
 
   const slots = generateTimeSlots();
 
+  const fetchInitialData = useCallback(async () => {
+    try {
+      const { data } = await axios.get('http://localhost:8000/bookings', {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+
+      const bookingsMap = {};
+      const usersMap = {};
+      data.forEach(booking => {
+        const date = new Date(booking.slotTime);
+        const timeKey = date.toTimeString().slice(0, 5); // HH:MM
+        bookingsMap[timeKey] = booking.userId;
+        usersMap[booking.userId] = booking.username;
+      });
+
+      setBookedSlots(bookingsMap);
+      setUserMap(usersMap);
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user.token, navigate]);
+
   const handleSlotClick = useCallback((slotTime) => {
     if (!user?.id || !socketRef.current || connectionStatus !== 'connected') {
       alert('Please wait for connection or login again.');
@@ -77,32 +101,9 @@ export default function TimeSlot({ user }) {
 
     socketRef.current = socket;
 
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const { data } = await axios.get('http://localhost:8000/bookings', {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-
-        const bookingsMap = {};
-        const usersMap = {};
-        data.forEach(booking => {
-          const date = new Date(booking.slotTime);
-          const timeKey = date.toTimeString().slice(0, 5); // HH:MM
-          bookingsMap[timeKey] = booking.userId;
-          usersMap[booking.userId] = booking.username;
-        });
-
-        setBookedSlots(bookingsMap);
-        setUserMap(usersMap);
-      } catch (err) {
-        if (err.response?.status === 401) navigate('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchInitialData();
+
+    const intervalId = setInterval(fetchInitialData, 1000);
 
     socket.on('connect', () => setConnectionStatus('connected'));
     socket.on('disconnect', () => setConnectionStatus('disconnected'));
@@ -132,8 +133,9 @@ export default function TimeSlot({ user }) {
 
     return () => {
       socket.disconnect();
+      clearInterval(intervalId);
     };
-  }, [user, navigate]);
+  }, [user, navigate, fetchInitialData]);
 
   if (!user?.id) {
     return <p className="text-red-500 text-center mt-20">User session expired. Please log in again.</p>;
@@ -149,24 +151,29 @@ export default function TimeSlot({ user }) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-        <h1 className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">Welcome, {user.username}</h1>
-        <div className={`px-4 py-2 rounded-full font-bold text-sm text-white
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Welcome, {user.username}
+        </h1>
+        <div
+          className={`px-4 py-2 rounded-full font-bold text-sm text-white transition
           ${connectionStatus === 'connected'
             ? 'bg-green-500'
             : connectionStatus === 'error'
             ? 'bg-red-500'
             : 'bg-yellow-400 text-gray-900'
-          }`
-        }>
-          {connectionStatus === 'connected' ? 'Online'
-            : connectionStatus === 'error' ? 'Connection Error'
+          }`}
+        >
+          {connectionStatus === 'connected'
+            ? 'Online'
+            : connectionStatus === 'error'
+            ? 'Connection Error'
             : 'Connecting...'}
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {slots.map(slotTime => {
           const isBooked = !!bookedSlots[slotTime];
           const isBookedByUser = String(bookedSlots[slotTime]) === String(user.id);
@@ -175,13 +182,12 @@ export default function TimeSlot({ user }) {
             <div
               key={slotTime}
               className={`
-                p-4 rounded-lg shadow cursor-pointer transition-all duration-150
-                text-center font-semibold text-lg
+                p-4 rounded-lg shadow-md cursor-pointer text-center font-semibold text-lg transition-all duration-150
                 ${isBooked
                   ? isBookedByUser
                     ? 'bg-blue-500 dark:bg-blue-700 text-white hover:bg-blue-600 dark:hover:bg-blue-800'
-                    : 'bg-red-500 dark:bg-red-700 text-white cursor-not-allowed opacity-70'
-                  : 'bg-green-500 dark:bg-green-700 text-white hover:bg-green-600 dark:hover:bg-green-800'}
+                    : 'bg-red-500 dark:bg-red-700 text-white opacity-70 cursor-not-allowed'
+                  : 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'}
               `}
               onClick={() => handleSlotClick(slotTime)}
             >

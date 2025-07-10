@@ -1,41 +1,69 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-function Home() {
+function Home({ sidebarOpen, setSidebarOpen }) {
+  const handleBackdropClick = () => setSidebarOpen(false);
+  const handleLinkClick = () => setSidebarOpen(false);
+
+  // Scroll lock when sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => document.body.classList.remove('overflow-hidden');
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
-      <aside className="w-72 bg-black dark:bg-gray-900 border-r border-gray-800 dark:border-gray-700 p-6">
-        <h2 className="mb-4 text-xl font-bold text-cyan-400">Contents</h2>
-        <ul className="space-y-3">
-          <li>
-            <a href="#intro" className="text-cyan-200 hover:text-cyan-400 transition">Introduction</a>
-          </li>
-          <li>
-            <a href="https://rerolab.com/" className="text-cyan-200 hover:text-cyan-400 transition" target="_blank" rel="noopener noreferrer">
-              Remote Robotics Laboratory
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/IEEERASPESU" className="text-cyan-200 hover:text-cyan-400 transition" target="_blank" rel="noopener noreferrer">
-              GitHub IEEE Robotics & Society PES University
-            </a>
-          </li>
-          <li>
-            <a href="#benefits" className="text-cyan-200 hover:text-cyan-400 transition">Benefits</a>
-          </li>
-          <li>
-            <a href="#inauguration" className="text-cyan-200 hover:text-cyan-400 transition">Inauguration</a>
-          </li>
-        </ul>
-      </aside>
+    <div className="relative min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white transition-colors">
+      
+      {/* Backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={handleBackdropClick}
+          className="fixed inset-0 bg-black bg-opacity-50 z-10"
+        />
+      )}
 
-      <main className="flex-1 py-12 px-8">
+      {/* Sidebar */}
+      {sidebarOpen && (
+        <aside className="fixed top-20 left-0 h-[calc(100vh-5rem)] w-72 bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-700 p-6 z-20 transition-transform">
+          <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Contents</h2>
+          <ul className="space-y-3 text-gray-900 dark:text-gray-100">
+            <li>
+              <a onClick={handleLinkClick} href="#intro" className="hover:text-cyan-500 transition">Introduction</a>
+            </li>
+            <li>
+              <a onClick={handleLinkClick} href="https://rerolab.com/" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-500 transition">
+                Remote Robotics Laboratory
+              </a>
+            </li>
+            <li>
+              <a onClick={handleLinkClick} href="https://github.com/IEEERASPESU" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-500 transition">
+                GitHub IEEE Robotics & Society PES University
+              </a>
+            </li>
+            <li>
+              <a onClick={handleLinkClick} href="#benefits" className="hover:text-cyan-500 transition">Benefits</a>
+            </li>
+            <li>
+              <a onClick={handleLinkClick} href="#inauguration" className="hover:text-cyan-500 transition">Inauguration</a>
+            </li>
+          </ul>
+        </aside>
+      )}
+
+      {/* Main Content */}
+      <main className={`transition-all ${sidebarOpen ? 'ml-72' : 'ml-0'} pt-20 px-8`}>
         <h1 className="text-4xl font-extrabold text-center text-cyan-400 mb-2">Remote Robotics (ReRo) Lab</h1>
-        <h2 className="text-lg text-center text-gray-400 dark:text-gray-300 mb-10">
+        <h2 className="text-lg text-center text-gray-600 dark:text-gray-300 mb-10">
           India's First 24/7 Virtual Robotics Lab by an Educational Institution
         </h2>
 
-        <h1 id="intro" className="text-2xl font-bold mb-4 text-white dark:text-white">Introduction</h1>
-        <section className="text-lg text-cyan-200/80 dark:text-cyan-200 space-y-3 leading-relaxed">
+        <h1 id="intro" className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+          <u>Introduction</u>
+        </h1>
+        <section className="text-lg text-gray-900 dark:text-gray-100 space-y-3 leading-relaxed">
           <p>
             The IEEE Robotics and Automation Student Chapter of PES University, in association with cRAIS (Centre for Robotics Automation and Intelligent Systems), has established ReRo Lab, India's first 24/7 remote robotics lab by an educational institution.
           </p>

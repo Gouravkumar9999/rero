@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate,useLocation } from 'react-router-dom';
 import logo from './logo.png';
-import GradientText from "./components/gradientText";
 import { getSocket } from './socket';
 import DarkModeToggle from "./DarkModeToggle";
+import { Menu } from 'lucide-react';
 
-const Navbar = ({ user, setUser }) => {
+const Navbar = ({ user, setUser, sidebarOpen, setSidebarOpen }) => {
   const [hasSlotAccess, setHasSlotAccess] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     const checkSlot = async () => {
@@ -37,24 +39,26 @@ const Navbar = ({ user, setUser }) => {
   };
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 bg-gray-950 dark:bg-white dark:bg-opacity-90 shadow-lg transition-colors">
+    <nav className="flex items-center justify-between px-4 py-5 bg-white dark:bg-gray-950 dark:bg-opacity-90 shadow-lg transition-colors relative z-50">
       <div className="flex items-center space-x-4">
-        <img src={logo} alt="Logo" className="h-12 w-12 object-contain" />
-        <h2 className="text-2xl font-extrabold text-cyan-400 dark:text-cyan-700 drop-shadow-md text-center">
-          <GradientText
-            colors={["#2BC6D1", "#2BC6D1", "#2BC6D1", "#28007B", "#2BC6D1"]}
-            animationSpeed={8}
-            showBorder={false}
-            className="custom-class"
-          >
-            IEEE Robotics and Automation Society
-          </GradientText>
-        </h2>
+        {/* Sidebar Toggle Button */}
+        {isHomePage && (
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 bg-gray-200 dark:bg-gray-800 rounded-md text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+          title="Toggle Sidebar"
+        >
+          <Menu className="h-6 w-6 sm:h-5 sm:w-5" />
+        </button>
+           )}
+
+        <img src={logo} alt="Logo" className="h-14 object-contain" />
       </div>
+
       <div className="flex items-center gap-4">
-        <Link to="/" className="text-cyan-200 dark:text-cyan-700 hover:text-cyan-400 dark:hover:text-cyan-900 font-semibold transition-colors">Home</Link>
-        {!user && <Link to="/login" className="text-cyan-200 dark:text-cyan-700 hover:text-cyan-400 dark:hover:text-cyan-900 font-semibold transition-colors">Login</Link>}
-        {!user && <Link to="/register" className="text-cyan-200 dark:text-cyan-700 hover:text-cyan-400 dark:hover:text-cyan-900 font-semibold transition-colors">Register</Link>}
+        <Link to="/" className="text-gray-900 dark:text-gray-100 hover:text-cyan-400 dark:hover:text-cyan-400 font-semibold transition-colors">Home</Link>
+        {!user && <Link to="/login" className="text-gray-900 dark:text-gray-100 hover:text-cyan-400 dark:hover:text-cyan-400 font-semibold transition-colors">Login</Link>}
+        {!user && <Link to="/register" className="text-gray-900 dark:text-gray-100 hover:text-cyan-400 dark:hover:text-cyan-400 font-semibold transition-colors">Register</Link>}
         {user && (
           <>
             <button

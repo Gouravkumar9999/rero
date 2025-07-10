@@ -212,18 +212,18 @@ const UploaderPage = forwardRef(({ user }, ref) => {
   // --- Render Editor, Video, Logs in three resizable panels ---
   return (
     <motion.div
-      className="min-h-screen bg-gray-950 text-white p-6"
+    className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white p-6 transition-colors duration-300"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <h1 className="text-3xl font-bold mb-6 text-center text-teal-400">Arduino Uploader</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">Arduino Uploader</h1>
       <div className="flex flex-wrap gap-7 justify-center items-start w-full">
         {/* Video Panel */}
         <ResizablePanel
           title="Live Camera Stream"
-          initialWidth={440}
-          initialHeight={300}
+          initialWidth={640}
+          initialHeight={750}
           minWidth={240}
           minHeight={180}
         >
@@ -235,8 +235,8 @@ const UploaderPage = forwardRef(({ user }, ref) => {
         {/* Editor Panel */}
         <ResizablePanel
           title="Code Editor"
-          initialWidth={500}
-          initialHeight={300}
+          initialWidth={750}
+          initialHeight={750}
           minWidth={320}
           minHeight={180}
         >
@@ -253,33 +253,38 @@ const UploaderPage = forwardRef(({ user }, ref) => {
                 if (value !== undefined) setCode(value);
               }}
             />
-            <div className="flex justify-end p-2 gap-2">
+           <div className="flex justify-end p-2 gap-2">
               <button
                 onClick={handleUpload}
-                className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded transition font-bold shadow"
+                className={`px-4 py-2 rounded font-bold shadow transition
+                  bg-teal-600 hover:bg-teal-700 text-white
+                  dark:bg-teal-500 dark:hover:bg-teal-400`}
                 disabled={!socket || socket.readyState !== 1}
               >
                 Upload
               </button>
               <button
                 onClick={handleCompile}
-                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded transition font-bold shadow"
+                className={`px-4 py-2 rounded font-bold shadow transition
+                  bg-yellow-500 hover:bg-yellow-600 text-black
+                  dark:bg-yellow-400 dark:hover:bg-yellow-300`}
               >
                 Compile
               </button>
             </div>
+
           </div>
         </ResizablePanel>
 
         {/* Logs Panel */}
         <ResizablePanel
           title="Logs"
-          initialWidth={340}
+          initialWidth={1032}
           initialHeight={300}
           minWidth={200}
           minHeight={120}
         >
-          <div className="bg-slate-900 text-cyan-200 p-2 h-full w-full font-mono text-sm overflow-auto whitespace-pre-wrap">
+       <div className="bg-gray-100 dark:bg-slate-900 text-gray-800 dark:text-cyan-200 p-2 h-full w-full font-mono text-sm overflow-auto whitespace-pre-wrap transition-colors">
             {logs.length === 0
               ? <span>No logs yet.</span>
               : logs.slice(-200).map((log, i) => <div key={i}>{log}</div>)
