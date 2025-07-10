@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import './Login.css';
-import { initializeSocket } from './socket'; 
+import { initializeSocket } from './socket';
 
 function Login({ setUser }) {
   const [username, setUsername] = useState('');
@@ -28,13 +27,11 @@ function Login({ setUser }) {
         }
       });
 
-    
       const token = response.data.access_token || response.data.token;
       const userId = response.data.userId;
-        if (!userId || isNaN(userId)) {
-          console.error('[ERROR] Invalid userId received from backend:', userId);
-          throw new Error('Invalid user ID');
-        }
+      if (!userId || isNaN(userId)) {
+        throw new Error('Invalid user ID');
+      }
       const usernameFromResponse = response.data.username || username;
 
       if (!token) {
@@ -42,24 +39,16 @@ function Login({ setUser }) {
       }
 
       const userData = {
-        id: userId ,
+        id: userId,
         username: usernameFromResponse,
         token: token
       };
 
       localStorage.setItem('user', JSON.stringify(userData));
-      console.log("Stored user:", JSON.parse(localStorage.getItem("user")));
-
       setUser(userData);
       initializeSocket(token);
-      
       navigate('/timeslots');
-
     } catch (error) {
-      console.error('Login error:', {
-        error: error.message,
-        response: error.response?.data
-      });
       setLoginFailed(true);
       setErrorMessage(
         error.response?.data?.detail ||
@@ -77,31 +66,43 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Login</h2>
-        <input 
-          type="text" 
-          placeholder="Username" 
-          value={username} 
-          onChange={(e) => setUsername(e.target.value)} 
+    <div className="flex justify-center items-center min-h-[90vh] bg-gray-100 dark:bg-gray-950 transition-colors">
+      <div className="bg-cyan-500/90 dark:bg-cyan-700/90 p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+        <h2 className="text-2xl font-bold mb-6 text-white">Login</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          className="block w-full mb-4 px-3 py-2 rounded border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 dark:bg-gray-900 dark:text-white"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           onKeyDown={handleKeyDown}
           autoFocus
         />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
+        <input
+          type="password"
+          placeholder="Password"
+          className="block w-full mb-4 px-3 py-2 rounded border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 dark:bg-gray-900 dark:text-white"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <button onClick={handleLogin} disabled={loading || !username || !password}>
+        <button
+          onClick={handleLogin}
+          disabled={loading || !username || !password}
+          className="w-full py-2 rounded bg-blue-700 hover:bg-blue-800 text-white font-bold transition"
+        >
           {loading ? 'Logging in...' : 'Login'}
         </button>
         {loginFailed && (
-          <div style={{ color: 'red', marginTop: '10px' }}>
+          <div className="mt-4 text-red-200">
             <p>{errorMessage}</p>
-            <p>Don't have an account? <Link to="/register">Register here</Link>.</p>
+            <p>
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="text-blue-200 underline hover:text-blue-400">
+                Register here
+              </Link>
+              .
+            </p>
           </div>
         )}
       </div>

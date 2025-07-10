@@ -14,6 +14,7 @@ from models import User, Booking
 from routes.auth_routes import get_current_user
 from config import SECRET_KEY, ALGORITHM
 from jose import jwt, JWTError
+from starlette.websockets import WebSocketState
 
 router = APIRouter(prefix="/arduino", tags=["arduino"])
 
@@ -101,20 +102,24 @@ async def websocket_endpoint(
 ):
     token = websocket.query_params.get("token")
     if not token:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
         if not username:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            if websocket.application_state != WebSocketState.DISCONNECTED:
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
     except JWTError:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
     user = db.query(User).filter(User.username == username).first()
     if not user or not check_slot_access(user, db):
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
     await websocket.accept()
@@ -190,4 +195,6 @@ async def websocket_endpoint(
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
-        await websocket.close()
+        # Only close if not already closed
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            await websocket.close()

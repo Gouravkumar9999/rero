@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import axios from 'axios';
-import './TimeSlot.css';
 
 export default function TimeSlot({ user }) {
   const [bookedSlots, setBookedSlots] = useState({});
@@ -39,7 +38,6 @@ export default function TimeSlot({ user }) {
       return;
     }
 
-
     const isBooked = !!bookedSlots[slotTime];
     const isBookedByUser = String(bookedSlots[slotTime]) === String(user.id);
     const bookedBy = userMap[bookedSlots[slotTime]] || 'Someone';
@@ -53,7 +51,7 @@ export default function TimeSlot({ user }) {
     const slotPeriod = hour < 12 ? 'AM' : 'PM';
 
     if (isBookedByUser) {
-      socketRef.current.emit('unbook-slot', { slotTime });  // send 24-hour format
+      socketRef.current.emit('unbook-slot', { slotTime });
     } else {
       socketRef.current.emit('book-slot', {
         slotTime,
@@ -98,7 +96,6 @@ export default function TimeSlot({ user }) {
         setBookedSlots(bookingsMap);
         setUserMap(usersMap);
       } catch (err) {
-        console.error('Initialization error:', err);
         if (err.response?.status === 401) navigate('/login');
       } finally {
         setIsLoading(false);
@@ -139,47 +136,57 @@ export default function TimeSlot({ user }) {
   }, [user, navigate]);
 
   if (!user?.id) {
-    return <p className="error-message">User session expired. Please log in again.</p>;
+    return <p className="text-red-500 text-center mt-20">User session expired. Please log in again.</p>;
   }
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <h3>Loading Time Slots</h3>
-        <div className="spinner" />
+      <div className="flex flex-col justify-center items-center min-h-[60vh]">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200 mb-2">Loading Time Slots</h3>
+        <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-4"></div>
       </div>
     );
   }
 
   return (
-    <div className="time-slot-container">
-      <header className="time-slot-header">
-        <h1>Welcome, {user.username}</h1>
-        <div className={`connection-status ${connectionStatus}`}>
-          {connectionStatus === 'connected' ? 'Online' :
-            connectionStatus === 'error' ? 'Connection Error' : 'Connecting...'}
+    <div className="max-w-6xl mx-auto p-6">
+      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">Welcome, {user.username}</h1>
+        <div className={`px-4 py-2 rounded-full font-bold text-sm text-white
+          ${connectionStatus === 'connected'
+            ? 'bg-green-500'
+            : connectionStatus === 'error'
+            ? 'bg-red-500'
+            : 'bg-yellow-400 text-gray-900'
+          }`
+        }>
+          {connectionStatus === 'connected' ? 'Online'
+            : connectionStatus === 'error' ? 'Connection Error'
+            : 'Connecting...'}
         </div>
       </header>
 
-      <div className="time-slot-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {slots.map(slotTime => {
           const isBooked = !!bookedSlots[slotTime];
           const isBookedByUser = String(bookedSlots[slotTime]) === String(user.id);
-          //const bookedBy = userMap[bookedSlots[slotTime]] || 'Someone';
 
           return (
             <div
               key={slotTime}
-              className={`time-slot-card ${
-                isBooked
-                  ? isBookedByUser ? 'booked-by-you' : 'booked-by-other'
-                  : 'available'
-              }`}
+              className={`
+                p-4 rounded-lg shadow cursor-pointer transition-all duration-150
+                text-center font-semibold text-lg
+                ${isBooked
+                  ? isBookedByUser
+                    ? 'bg-blue-500 dark:bg-blue-700 text-white hover:bg-blue-600 dark:hover:bg-blue-800'
+                    : 'bg-red-500 dark:bg-red-700 text-white cursor-not-allowed opacity-70'
+                  : 'bg-green-500 dark:bg-green-700 text-white hover:bg-green-600 dark:hover:bg-green-800'}
+              `}
               onClick={() => handleSlotClick(slotTime)}
             >
-              <div className="time-display">{formatTo12Hour(slotTime)}</div>
-
-              <div className="slot-status">
+              <div className="mb-2 text-xl font-bold">{formatTo12Hour(slotTime)}</div>
+              <div className="text-sm">
                 {isBooked
                   ? isBookedByUser
                     ? 'Your Booking (Click to Cancel)'

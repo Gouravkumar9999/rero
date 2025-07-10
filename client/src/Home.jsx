@@ -1,28 +1,41 @@
 import React from 'react';
-import './Home.css';
 
 function Home() {
   return (
-    <div className="home-container">
-      <div className="sidebar">
-        <h2>Contents</h2>
-        <ul>
-          <li><a href="#intro">Introduction</a></li>
-          <li><a href="https://rerolab.com/">Remote Robotics Laboratory</a></li>
-          <li><a href="https://github.com/IEEERASPESU">GitHub IEEE Robotics & Society PES University</a></li>
-          <li><a href="#benefits">Benefits</a></li>
-          <li><a href="#inauguration">Inauguration</a></li>
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white transition-colors">
+      <aside className="w-72 bg-black dark:bg-gray-900 border-r border-gray-800 dark:border-gray-700 p-6">
+        <h2 className="mb-4 text-xl font-bold text-cyan-400">Contents</h2>
+        <ul className="space-y-3">
+          <li>
+            <a href="#intro" className="text-cyan-200 hover:text-cyan-400 transition">Introduction</a>
+          </li>
+          <li>
+            <a href="https://rerolab.com/" className="text-cyan-200 hover:text-cyan-400 transition" target="_blank" rel="noopener noreferrer">
+              Remote Robotics Laboratory
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/IEEERASPESU" className="text-cyan-200 hover:text-cyan-400 transition" target="_blank" rel="noopener noreferrer">
+              GitHub IEEE Robotics & Society PES University
+            </a>
+          </li>
+          <li>
+            <a href="#benefits" className="text-cyan-200 hover:text-cyan-400 transition">Benefits</a>
+          </li>
+          <li>
+            <a href="#inauguration" className="text-cyan-200 hover:text-cyan-400 transition">Inauguration</a>
+          </li>
         </ul>
-      </div>
+      </aside>
 
-      <div className="home-main-content">
-        <h1 className="main-title">Remote Robotics (ReRo) Lab</h1>
-        <h2 className="subtitle">
+      <main className="flex-1 py-12 px-8">
+        <h1 className="text-4xl font-extrabold text-center text-cyan-400 mb-2">Remote Robotics (ReRo) Lab</h1>
+        <h2 className="text-lg text-center text-gray-400 dark:text-gray-300 mb-10">
           India's First 24/7 Virtual Robotics Lab by an Educational Institution
         </h2>
 
-        <h1 id="intro" className="section-title">Introduction</h1>
-        <div className="section-content">
+        <h1 id="intro" className="text-2xl font-bold mb-4 text-white dark:text-white">Introduction</h1>
+        <section className="text-lg text-cyan-200/80 dark:text-cyan-200 space-y-3 leading-relaxed">
           <p>
             The IEEE Robotics and Automation Student Chapter of PES University, in association with cRAIS (Centre for Robotics Automation and Intelligent Systems), has established ReRo Lab, India's first 24/7 remote robotics lab by an educational institution.
           </p>
@@ -47,8 +60,8 @@ function Home() {
           <p>
             The lab will be autonomous and available for use globally in the near future.
           </p>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

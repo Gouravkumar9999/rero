@@ -18,9 +18,10 @@ function App() {
     }
   }, []);
 
+  // Apply the background and text color globally
   return (
     <Router>
-      <div className="content">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white transition-colors duration-300">
         <Navbar user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -29,7 +30,7 @@ function App() {
           <Route
             path="/uploader"
             element={user ? (<UploaderPage user={user} />) : (<Navigate to="/login" replace />)}
-/>
+          />
           <Route
             path="/timeslots"
             element={
