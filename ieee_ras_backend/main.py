@@ -7,6 +7,7 @@ from socket_events import register_socket_events
 from booking import router as booking_router
 from slot_access import router as slot_access_router
 from arduino_routes import router as arduino_router
+from video_stream import router as video_stream_router
 
 
 # === Setup Socket.IO ===
@@ -32,6 +33,6 @@ fastapi_app.include_router(auth_router)
 fastapi_app.include_router(booking_router)
 fastapi_app.include_router(slot_access_router)
 fastapi_app.include_router(arduino_router)
-
+fastapi_app.include_router(video_stream_router)
 # === Combine FastAPI + SocketIO ===
 app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)  # use from same namespace

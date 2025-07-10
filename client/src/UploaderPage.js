@@ -1,9 +1,81 @@
 import React, { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import Editor from "@monaco-editor/react";
 import { motion } from "framer-motion";
+import VideoStream from "./VideoStream";
 import editorOptions from "./editorOptions.json";
 
-// Move getToken OUTSIDE the component so it is stable and does not trigger hook warnings
+// --- ResizablePanel component ---
+function ResizablePanel({
+  minWidth = 240,
+  minHeight = 180,
+  initialWidth = 400,
+  initialHeight = 300,
+  children,
+  title,
+  className = "",
+}) {
+  const panelRef = useRef();
+  const [size, setSize] = useState({ width: initialWidth, height: initialHeight });
+  const [dragging, setDragging] = useState(false);
+  const [origin, setOrigin] = useState({ x: 0, y: 0 });
+
+  const onMouseDown = (e) => {
+    e.preventDefault();
+    setDragging(true);
+    setOrigin({ x: e.clientX, y: e.clientY });
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e) => {
+      setSize((prev) => ({
+        width: Math.max(minWidth, prev.width + (e.clientX - origin.x)),
+        height: Math.max(minHeight, prev.height + (e.clientY - origin.y)),
+      }));
+      setOrigin({ x: e.clientX, y: e.clientY });
+    };
+    const onUp = () => setDragging(false);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    // eslint-disable-next-line
+  }, [dragging, origin]);
+
+  return (
+    <div
+      ref={panelRef}
+      className={`relative bg-gray-900 dark:bg-gray-900/80 rounded-lg shadow-lg border border-cyan-400/30 overflow-hidden flex flex-col ${className}`}
+      style={{
+        width: size.width,
+        height: size.height,
+        resize: "none",
+        minWidth,
+        minHeight,
+        transition: dragging ? "none" : "box-shadow 0.2s",
+        zIndex: 10,
+      }}
+    >
+      <div className="font-bold px-4 py-2 border-b border-cyan-400/20 bg-cyan-50/10 dark:bg-cyan-900/40 text-cyan-200 select-none">
+        {title}
+      </div>
+      <div className="flex-1 overflow-auto">{children}</div>
+      {/* Drag handle (bottom-right) */}
+      <div
+        onMouseDown={onMouseDown}
+        className="absolute right-1 bottom-1 w-4 h-4 cursor-nwse-resize bg-cyan-400/80 rounded-sm flex items-end justify-end"
+        style={{ zIndex: 20 }}
+        title="Resize"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 12h10V2" stroke="#fff" strokeWidth="2" fill="none"/></svg>
+      </div>
+    </div>
+  );
+}
+
+// --- Token helper ---
 function getToken(user) {
   return user?.token || JSON.parse(localStorage.getItem("user"))?.token;
 }
@@ -70,7 +142,6 @@ const UploaderPage = forwardRef(({ user }, ref) => {
     };
 
     newSocket.onmessage = (event) => {
-      console.log("[WebSocket Received]:", event.data);  
       setLogs((prevLogs) => [...prevLogs, event.data]);
     };
 
@@ -102,13 +173,13 @@ const UploaderPage = forwardRef(({ user }, ref) => {
       setLogs((prevLogs) => [...prevLogs, "WebSocket not connected"]);
       return;
     }
-    setLogs(["Upload functionality triggered..."]);
+    setLogs((prevLogs) => [...prevLogs, "Upload functionality triggered..."]);
     socket.send(editorRef.current?.getValue());
   };
 
   // --- Compile Button Handler ---
   const handleCompile = async () => {
-    setLogs(["Compile functionality triggered..."]);
+    setLogs((prevLogs) => [...prevLogs, "Compile functionality triggered..."]);
     try {
       const token = getToken(user);
       const response = await fetch("http://localhost:8000/arduino/compile", {
@@ -121,7 +192,6 @@ const UploaderPage = forwardRef(({ user }, ref) => {
       });
 
       const data = await response.json();
-      setLogs([]);
       if (response.ok) {
         setLogs((prevLogs) => [...prevLogs, "Compilation successful!"]);
         if (data.warnings) {
@@ -136,10 +206,10 @@ const UploaderPage = forwardRef(({ user }, ref) => {
   };
 
   // --- Access Control UI ---
-  if (!checked) return <p>Validating access...</p>;
-  if (!allowed) return <p>⛔ Access Denied: Your booked slot has not started yet.</p>;
+  if (!checked) return <p className="text-lg text-cyan-300 py-8 text-center">Validating access...</p>;
+  if (!allowed) return <p className="text-lg text-red-400 py-8 text-center">⛔ Access Denied: Your booked slot has not started yet.</p>;
 
-  // --- Render Editor UI ---
+  // --- Render Editor, Video, Logs in three resizable panels ---
   return (
     <motion.div
       className="min-h-screen bg-gray-950 text-white p-6"
@@ -148,49 +218,75 @@ const UploaderPage = forwardRef(({ user }, ref) => {
       transition={{ duration: 0.5 }}
     >
       <h1 className="text-3xl font-bold mb-6 text-center text-teal-400">Arduino Uploader</h1>
+      <div className="flex flex-wrap gap-7 justify-center items-start w-full">
+        {/* Video Panel */}
+        <ResizablePanel
+          title="Live Camera Stream"
+          initialWidth={440}
+          initialHeight={300}
+          minWidth={240}
+          minHeight={180}
+        >
+          <div className="w-full h-full flex items-center justify-center bg-black">
+            <VideoStream wsUrl="ws://localhost:8000/ws/video" fps={24} quality={60} />
+          </div>
+        </ResizablePanel>
 
-      <div className="max-w-6xl mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-        <Editor
-          height="60vh"
-          defaultLanguage="cpp"
-          theme="vs-dark"
-          value={code}
-          onMount={handleEditorDidMount}
-          onChange={(value) => {
-            if (value !== undefined) {
-              setCode(value);
+        {/* Editor Panel */}
+        <ResizablePanel
+          title="Code Editor"
+          initialWidth={500}
+          initialHeight={300}
+          minWidth={320}
+          minHeight={180}
+        >
+          <div className="flex flex-col h-full">
+            <Editor
+              height="100%"
+              width="100%"
+              defaultLanguage="cpp"
+              value={code}
+              theme="vs-dark"
+              options={editorOptions}
+              onMount={handleEditorDidMount}
+              onChange={(value) => {
+                if (value !== undefined) setCode(value);
+              }}
+            />
+            <div className="flex justify-end p-2 gap-2">
+              <button
+                onClick={handleUpload}
+                className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded transition font-bold shadow"
+                disabled={!socket || socket.readyState !== 1}
+              >
+                Upload
+              </button>
+              <button
+                onClick={handleCompile}
+                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded transition font-bold shadow"
+              >
+                Compile
+              </button>
+            </div>
+          </div>
+        </ResizablePanel>
+
+        {/* Logs Panel */}
+        <ResizablePanel
+          title="Logs"
+          initialWidth={340}
+          initialHeight={300}
+          minWidth={200}
+          minHeight={120}
+        >
+          <div className="bg-slate-900 text-cyan-200 p-2 h-full w-full font-mono text-sm overflow-auto whitespace-pre-wrap">
+            {logs.length === 0
+              ? <span>No logs yet.</span>
+              : logs.slice(-200).map((log, i) => <div key={i}>{log}</div>)
             }
-          }}
-          options={editorOptions}
-        />
+          </div>
+        </ResizablePanel>
       </div>
-
-      <div className="flex justify-center gap-6 mt-6">
-        <button
-          className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-2xl shadow-md text-lg transition-colors"
-          onClick={handleUpload}
-        >
-          Upload
-        </button>
-        <button
-          className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2 rounded-2xl shadow-md text-lg transition-colors"
-          onClick={handleCompile}
-        >
-          Compile
-        </button>
-      </div>
-
-      {/* Logs Display */}
-      <div className="max-w-6xl mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-  <div className="p-4">
-    <h2 className="text-xl font-semibold mb-2 text-white-800">Logs:</h2>
-    <div className="max-w-6xl mx-auto bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
-      {logs.map((log, index) => (
-        <p key={index}>{log}</p>
-      ))}
-    </div>
-  </div>
-</div>
     </motion.div>
   );
 });
